@@ -251,7 +251,7 @@ function createGenerator({
   }
 
   function createRunSummaryMessage(total, successCount, elapsedSeconds, targetModel, cancelled = false) {
-    if (cancelled) {
+    if (cancelled && successCount === 0) {
       return total <= 1
         ? `Job canceled after ${elapsedSeconds} seconds - ${targetModel}`
         : `Batch canceled after ${elapsedSeconds} seconds - ${targetModel}`
@@ -594,10 +594,11 @@ function createGenerator({
 
       if (runState.cancelRequested) {
         if (generatedImages.length > 0 && typeof logLine === "function") {
-          logLine(`Canceled run discarded ${generatedImages.length} generated image(s).`)
+          logLine(`Keeping ${generatedImages.length} finished image(s); aborted unfinished requests.`)
         }
-        generatedImages = []
-        return
+        if (generatedImages.length === 0) {
+          return
+        }
       }
 
       if (generatedImages.length === 0) {

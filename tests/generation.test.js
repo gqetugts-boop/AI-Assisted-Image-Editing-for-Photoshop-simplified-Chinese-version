@@ -735,9 +735,8 @@ test.describe("createGenerator", () => {
     assert.equal(ui.jobCount.textContent, "");
   });
 
-  test("turns generate button into cancel after timeout and discards all results on cancel click", async () => {
+  test("turns generate button into cancel after timeout and places finished images on cancel click", async () => {
     const batchPlaceCalls = [];
-    const deferredCalls = [];
     const logs = [];
     let timeoutHandler;
     let providerCallCount = 0;
@@ -755,6 +754,8 @@ test.describe("createGenerator", () => {
     const generator = createGenerator({
       app: {
         activeDocument: {
+          id: 1,
+          name: "Cover.psd",
           selection: {
             bounds: {
               left: 0,
@@ -784,7 +785,7 @@ test.describe("createGenerator", () => {
         apiKey: { "NanoBananaPro-api-key": "KEY" },
         resolution: "2K",
         adaptiveResolutionSetting: false,
-        enableDeferredBatchRecovery: true,
+        enableDeferredBatchRecovery: false,
         maxWaitingTimeSeconds: 120,
         currentJobCount: 0
       },
@@ -820,20 +821,6 @@ test.describe("createGenerator", () => {
         });
       },
       critiqueWithProvider: async function* () {},
-      deferredBatchManager: {
-        async deferBatch(args) {
-          deferredCalls.push(args);
-          return {
-            id: "deferred-cancel-1",
-            docName: "Cover.psd",
-            successCount: args.successCount,
-            requestedCount: args.requestedCount
-          };
-        },
-        getPendingBatches() {
-          return [];
-        }
-      },
       logLine: (...parts) => {
         logs.push(parts.join(" "));
       },
@@ -862,12 +849,119 @@ test.describe("createGenerator", () => {
     generator.handleGenerateClick();
     await runPromise;
 
-    assert.equal(batchPlaceCalls.length, 0);
-    assert.equal(deferredCalls.length, 0);
-    assert.equal(logs.some(line => line.includes("Batch canceled after")), true);
-    assert.equal(logs.some(line => line.includes("1/3 succeeded")), false);
+    assert.deepEqual(batchPlaceCalls, [["generated-b64-1"]]);
+    assert.equal(logs.some(line => line.includes("Keeping 1 finished image(s)")), true);
+    assert.equal(logs.some(line => line.includes("1/3 succeeded")), true);
+    assert.equal(logs.some(line => line.includes("discarded")), false);
     assert.equal(ui.generateButton.innerText, "Generate");
     assert.equal(ui.generateButton.style.backgroundColor, "");
+  });
+
+  test("cancel with no finished images places nothing", async () => {
+    const batchPlaceCalls = [];
+    const logs = [];
+    let timeoutHandler;
+    const ui = {
+      testCheckbox: { checked: false },
+      promptInput: { value: "batch prompt" },
+      generateButton: { disabled: false, innerText: "Generate", style: { backgroundColor: "" } },
+      allowNSFW: { checked: false },
+      temperature: { value: "1.0" },
+      topP: { value: "0.90" },
+      imageToProcess: {},
+      jobCount: { style: { display: "none" }, textContent: "" }
+    };
+
+    const generator = createGenerator({
+      app: {
+        activeDocument: {
+          id: 1,
+          name: "Cover.psd",
+          selection: {
+            bounds: {
+              left: 0,
+              right: 100,
+              top: 0,
+              bottom: 100,
+              width: 100,
+              height: 100
+            }
+          }
+        }
+      },
+      core: {
+        showAlert: () => {}
+      },
+      ui,
+      state: {
+        selectedModel: "gemini-3.1-flash-image-preview",
+        aspectRatio: "3:4",
+        enableBatchGeneration: true,
+        batchCount: 2,
+        textToImage: false,
+        imageArray: [],
+        skipMask: false,
+        persistGeneratedImages: false,
+        showModelParameters: false,
+        apiKey: { "NanoBananaPro-api-key": "KEY" },
+        resolution: "2K",
+        adaptiveResolutionSetting: false,
+        enableDeferredBatchRecovery: false,
+        maxWaitingTimeSeconds: 120,
+        currentJobCount: 0
+      },
+      selection: {
+        async getImageDataToBase64() {
+          return "selection-b64";
+        }
+      },
+      placer: {
+        async placeToCurrentDocAtSelection() {},
+        async placeBatchToCurrentDocAtSelection(images) {
+          batchPlaceCalls.push(images);
+        }
+      },
+      generateWithProvider: async (_modelId, options) => new Promise((_, reject) => {
+        if (options.signal?.aborted) {
+          const abortedError = new Error("aborted");
+          abortedError.name = "AbortError";
+          reject(abortedError);
+          return;
+        }
+        options.signal?.addEventListener("abort", () => {
+          const abortedError = new Error("aborted");
+          abortedError.name = "AbortError";
+          reject(abortedError);
+        }, { once: true });
+      }),
+      critiqueWithProvider: async function* () {},
+      logLine: (...parts) => {
+        logs.push(parts.join(" "));
+      },
+      utils: {
+        pickTier: () => "2K"
+      },
+      seedreamModelId: ["seedream"],
+      grokModelId: "grok-imagine-image",
+      nanoBananaModelId: "gemini-3-pro-image",
+      setTimeoutImpl: (callback) => {
+        timeoutHandler = callback;
+        return 1;
+      },
+      clearTimeoutImpl: () => {}
+    });
+
+    const runPromise = generator.generate();
+    await flushAsyncWork();
+
+    timeoutHandler();
+    generator.handleGenerateClick();
+    await runPromise;
+
+    assert.equal(batchPlaceCalls.length, 0);
+    assert.equal(logs.some(line => line.includes("Batch canceled after")), true);
+    assert.equal(logs.some(line => line.includes("Keeping")), false);
+    assert.equal(ui.generateButton.innerText, "Generate");
   });
 
   test("clamps runtime batch count to maxBatchCount", async () => {
