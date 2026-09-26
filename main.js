@@ -20,6 +20,7 @@ const {
   NANOBANANA_PRO,
   NANOBANANA_2,
   GROK_IMAGINE,
+  GROK_IMAGINE_2,
   DEFAULT_API_KEYS,
   DEFAULT_PLUGIN_PREFS,
   DEFAULT_PROMPT_PRESETS,
@@ -79,7 +80,7 @@ const generator = createGenerator({
   seedreamModelId: [SEEDREAM, SEEDREAM_5],
   seedream5ModelId: SEEDREAM_5,
   seedream5ProModelId: SEEDREAM_5_PRO,
-  grokModelId: GROK_IMAGINE,
+  grokModelId: [GROK_IMAGINE, GROK_IMAGINE_2],
   nanoBananaModelId: NANOBANANA_PRO
 });
 
@@ -142,7 +143,7 @@ entrypoints.setup({
 initializeUI({
   ui,
   state,
-  models: { SEEDREAM, SEEDREAM_5, SEEDREAM_5_PRO, NANOBANANA_PRO, NANOBANANA_2, GROK_IMAGINE },
+  models: { SEEDREAM, SEEDREAM_5, SEEDREAM_5_PRO, NANOBANANA_PRO, NANOBANANA_2, GROK_IMAGINE, GROK_IMAGINE_2 },
   logger,
   storage,
   defaultChatPromptText: DEFAULT_CHAT_PROMPT
@@ -151,7 +152,7 @@ initializeUI({
 bindEvents({
   ui,
   state,
-  models: { SEEDREAM, SEEDREAM_5, SEEDREAM_5_PRO, NANOBANANA_PRO, NANOBANANA_2, GROK_IMAGINE },
+  models: { SEEDREAM, SEEDREAM_5, SEEDREAM_5_PRO, NANOBANANA_PRO, NANOBANANA_2, GROK_IMAGINE, GROK_IMAGINE_2 },
   logger,
   storage,
   generator,

@@ -103,6 +103,72 @@ test.describe("generateImage (xai)", () => {
     assert.equal(body.aspect_ratio, undefined);
   });
 
+  test("sends grok imagine 2.0 on the same generation body without quality", async (t) => {
+    const originalFetch = global.fetch;
+    let lastCall;
+    global.fetch = async (url, options) => {
+      lastCall = { url, options };
+      return {
+        ok: true,
+        json: async () => ({ data: [{ b64_json: "GEN_RESULT" }] })
+      };
+    };
+    t.after(() => {
+      global.fetch = originalFetch;
+    });
+
+    const result = await generateImage({
+      prompt: "hello",
+      apiKey: { "xAI-api-key": "KEY" },
+      resolution: "2K",
+      aspectRatio: "16:9",
+      modelId: "grok-imagine-image-2.0",
+      textToImage: true
+    });
+
+    assert.equal(result, "GEN_RESULT");
+    assert.equal(lastCall.url, "https://api.x.ai/v1/images/generations");
+    const body = JSON.parse(lastCall.options.body);
+    assert.equal(body.model, "grok-imagine-image-2.0");
+    assert.equal(body.resolution, "2k");
+    assert.equal(body.aspect_ratio, "16:9");
+    assert.equal(body.response_format, "b64_json");
+    assert.equal(Object.hasOwn(body, "quality"), false);
+  });
+
+  test("sends grok imagine 2.0 on the same edit body without quality", async (t) => {
+    const originalFetch = global.fetch;
+    let lastCall;
+    global.fetch = async (url, options) => {
+      lastCall = { url, options };
+      return {
+        ok: true,
+        json: async () => ({ data: [{ b64_json: "EDIT_RESULT" }] })
+      };
+    };
+    t.after(() => {
+      global.fetch = originalFetch;
+    });
+
+    const result = await generateImage({
+      prompt: "edit it",
+      base64Image: "BASE",
+      apiKey: { "xAI-api-key": "KEY" },
+      resolution: "1K",
+      modelId: "grok-imagine-image-2.0",
+      textToImage: false
+    });
+
+    assert.equal(result, "EDIT_RESULT");
+    assert.equal(lastCall.url, "https://api.x.ai/v1/images/edits");
+    const body = JSON.parse(lastCall.options.body);
+    assert.equal(body.model, "grok-imagine-image-2.0");
+    assert.equal(body.resolution, "1k");
+    assert.equal(body.aspect_ratio, undefined);
+    assert.equal(body.image.url, "data:image/png;base64,BASE");
+    assert.equal(Object.hasOwn(body, "quality"), false);
+  });
+
   test("passes AbortSignal to fetch", async (t) => {
     const originalFetch = global.fetch;
     let lastCall;
