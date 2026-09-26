@@ -136,6 +136,13 @@ test.describe("capResolution", () => {
     }), "4K");
   });
 
+  test("caps Grok Imagine 2.0 4K to 2K", () => {
+    assert.equal(utils.capResolution("4K", "grok-imagine-image-2.0", {
+      allow4KGeneration: true,
+      grokModelId: ["grok-imagine-image", "grok-imagine-image-2.0"]
+    }), "2K");
+  });
+
   test("keeps SeeDream 5.0 3K when 4K is not allowed", () => {
     assert.equal(utils.capResolution("3K", "seedream-5", {
       allow4KGeneration: false,

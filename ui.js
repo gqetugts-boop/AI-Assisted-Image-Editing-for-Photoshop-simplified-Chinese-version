@@ -6,7 +6,7 @@ function getResolutionCapOptions(state, models) {
     seedreamModelId: models?.SEEDREAM,
     seedream5ModelId: models?.SEEDREAM_5,
     seedream5ProModelId: models?.SEEDREAM_5_PRO,
-    grokModelId: models?.GROK_IMAGINE
+    grokModelId: [models?.GROK_IMAGINE, models?.GROK_IMAGINE_2].filter(Boolean)
   };
 }
 
@@ -171,7 +171,8 @@ function renderModelUI(ui, state, models, logLine) {
     if (currentResolution === "3K" || currentResolution === "4K") {
       syncResolutionSelection(ui, state, ui.resolutionOption2K ? "2K" : "1K");
     }
-  } else if (state.selectedModel === models.GROK_IMAGINE) {
+  } else if (state.selectedModel === models.GROK_IMAGINE ||
+    state.selectedModel === models.GROK_IMAGINE_2) {
     if (ui.resolutionOption4K) {
       ui.resolutionOption4K.style.display = "none";
       ui.resolutionOption4K.selected = false;
@@ -205,7 +206,8 @@ function renderModelUI(ui, state, models, logLine) {
         state.selectedModel === models.NANOBANANA_2) && state.showModelParameters ? "" : "none";
   }
 
-  if (state.selectedModel === models.GROK_IMAGINE) {
+  if (state.selectedModel === models.GROK_IMAGINE ||
+    state.selectedModel === models.GROK_IMAGINE_2) {
     if (ui.allowNSFW) {
       ui.allowNSFW.style.display = "";
     }

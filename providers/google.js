@@ -1,4 +1,8 @@
-const supportedModels = ["gemini-3-pro-image", "gemini-3.1-flash-image-preview"];
+const supportedModels = [
+  "gemini-3-pro-image",
+  "gemini-3.1-flash-image",
+  "gemini-3.1-flash-image-preview"
+];
 const VERTEX_API_ENDPOINT = "https://aiplatform.googleapis.com";
 const AI_STUDIO_API_ENDPOINT = "https://generativelanguage.googleapis.com";
 const GOOGLE_AI_STUDIO_KEY = "GoogleAIStudio-api-key";

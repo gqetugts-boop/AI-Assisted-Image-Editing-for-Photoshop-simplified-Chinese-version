@@ -1,4 +1,4 @@
-const supportedModels = ["grok-imagine-image"];
+const supportedModels = ["grok-imagine-image", "grok-imagine-image-2.0"];
 
 const API_ENDPOINT = "https://api.x.ai/v1/images";
 

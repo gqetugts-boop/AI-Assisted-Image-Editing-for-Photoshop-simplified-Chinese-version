@@ -2,8 +2,9 @@ const SEEDREAM = "doubao-seedream-4-5-251128";
 const SEEDREAM_5 = "doubao-seedream-5-0-260128";
 const SEEDREAM_5_PRO = "doubao-seedream-5-0-pro-260628";
 const NANOBANANA_PRO = "gemini-3-pro-image";
-const NANOBANANA_2 = "gemini-3.1-flash-image-preview";
+const NANOBANANA_2 = "gemini-3.1-flash-image";
 const GROK_IMAGINE = "grok-imagine-image";
+const GROK_IMAGINE_2 = "grok-imagine-image-2.0";
 const { DEFAULT_MAX_BATCH_COUNT, clampMaxBatchCount, clampBatchCount } = require("./limits");
 const { DEFAULT_GROUP_COLOR_LABEL, normalizeGroupColorLabel } = require("./group-color-labels");
 
@@ -161,6 +162,7 @@ module.exports = {
   NANOBANANA_PRO,
   NANOBANANA_2,
   GROK_IMAGINE,
+  GROK_IMAGINE_2,
   DEFAULT_API_KEYS,
   DEFAULT_PLUGIN_PREFS,
   DEFAULT_PROMPT_PRESETS,

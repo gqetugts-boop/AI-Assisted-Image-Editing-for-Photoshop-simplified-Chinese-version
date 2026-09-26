@@ -24,6 +24,7 @@ test.describe("providerMap (index)", () => {
   });
 
   test("maps Nano Banana 2 to google provider", () => {
+    assert.equal(providerMap["gemini-3.1-flash-image"], google);
     assert.equal(providerMap["gemini-3.1-flash-image-preview"], google);
   });
 });
